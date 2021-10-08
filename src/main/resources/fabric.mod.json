@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "hardcore-reset",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Hardcore Reset",
+  "description": "Simple mod to keep track of players who have died and allows resetting the server to a new world",
   "authors": [
-    "Me!"
+    "Master_Cash"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
 
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "net.fabricmc.example.ExampleMod"
+    "server": [
+      "dev.cashire.hardcorereset.Main"
     ]
   },
   "mixins": [
@@ -30,9 +30,7 @@
     "fabricloader": ">=0.11.3",
     "fabric": "*",
     "minecraft": "1.17.x",
-    "java": ">=16"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "java": ">=16",
+    "cash-config": "1.4.x"
   }
 }
