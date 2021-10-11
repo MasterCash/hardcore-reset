@@ -25,7 +25,7 @@ public class CommandBuilder {
   public static int restart(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     var server = context.getSource().getServer();
     var numPlayers = Main.playersAlive(server);
-    if (numPlayers > 0) {
+    if (numPlayers <= 0) {
       server.stop(false);
     } else {
       var player = context.getSource().getPlayer();
