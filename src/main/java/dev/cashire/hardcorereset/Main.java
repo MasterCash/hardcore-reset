@@ -28,8 +28,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.level.ServerWorldProperties;
 
+/**
+ * Entry point for Server Side logic
+ */
 public class Main implements DedicatedServerModInitializer {
+  // Config File
   private static Config CONFIG = new Config("hardcore-reset.json");
+  // 
   private static Logger LOGGER = LogManager.getLogger("hardcore-reset");
 
   @Override
@@ -99,11 +104,10 @@ public class Main implements DedicatedServerModInitializer {
 
     // when stopping see if we should shutdown.
     ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
-      updateConfig();
-      var shouldDelete = willRestart(server);
+      var alivePlayers = playersAlive(server);
       var forceDelete = isForceDelete(); 
 
-      if (shouldDelete || forceDelete) {
+      if (alivePlayers > 0 || forceDelete) {
         if (forceDelete) {
           LOGGER.warn("Server was force Reset");
         }
@@ -133,13 +137,13 @@ public class Main implements DedicatedServerModInitializer {
     });
   }
 
-  private boolean isForceDelete() {
+  private static boolean isForceDelete() {
     var forceDelete = CONFIG.getItem("forceDelete");
     if(forceDelete == null) return false;
     return forceDelete.asBoolean().getValue();
   }
 
-  private void clearForceDelete() {
+  private static void clearForceDelete() {
     CONFIG.removeItem("forceDelete");
   }
 
@@ -147,19 +151,20 @@ public class Main implements DedicatedServerModInitializer {
     CONFIG.setItem(new ConfigBoolean("forceDelete", true));
   }
 
-  public static boolean willRestart(MinecraftServer server) {
-
+  public static int playersAlive(MinecraftServer server) {
+    updateConfig();
+    int numPlayers = 0;
     if(server.isHardcore()) {
       for (var playerData : CONFIG.getItem("players").asGroup().getValue()) {
         if (playerData.asGroup().getItem("isAlive").asBoolean().getValue()) {
-          return false;
+          ++numPlayers;
         }
       }
     }
-    return true;
+    return numPlayers;
   }
 
-  private void deleteFile(File file) {
+  private static void deleteFile(File file) {
     file.deleteOnExit();
     if(file.isDirectory()) {
       for (var subFile : file.listFiles()) {
@@ -168,7 +173,7 @@ public class Main implements DedicatedServerModInitializer {
     }
   }
 
-  private void setupConfig() {
+  private static void setupConfig() {
     if(!CONFIG.hasItem("players")) {
       CONFIG.addItem(new ConfigGroup("players"));
     }
@@ -183,7 +188,7 @@ public class Main implements DedicatedServerModInitializer {
     CONFIG.saveFile();
   }
 
-  private void updateConfig() {
+  private static void updateConfig() {
     var daysSinceActive = CONFIG.getItem("daysSinceActive").asNumber().getValue();
     var players = CONFIG.getItem("players").asGroup();
     for (var playerData : players.getValue()) {
@@ -196,7 +201,7 @@ public class Main implements DedicatedServerModInitializer {
     }
   }
 
-  private void updatePlayer(String uuid, boolean isAlive) {
+  private static void updatePlayer(String uuid, boolean isAlive) {
     var players = CONFIG.getItem("players").asGroup();
     if(!players.hasItem(uuid)) {
       var playerData = new ConfigGroup(uuid, of(

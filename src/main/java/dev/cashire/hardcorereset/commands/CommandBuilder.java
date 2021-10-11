@@ -24,11 +24,12 @@ public class CommandBuilder {
 
   public static int restart(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     var server = context.getSource().getServer();
-    if (Main.willRestart(server)) {
+    var numPlayers = Main.playersAlive(server);
+    if (numPlayers > 0) {
       server.stop(false);
     } else {
       var player = context.getSource().getPlayer();
-      Text text = Text.of("Cannot restart server due to: "  + (server.isHardcore() ? "all players haven't died" : "server is not hardcore"));
+      Text text = Text.of("Cannot restart server due to: "  + (server.isHardcore() ? numPlayers + " players haven't died" : "server is not hardcore"));
       player.sendMessage(text, true);
       return 0;
     }
